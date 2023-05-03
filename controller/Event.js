@@ -45,11 +45,31 @@ const getAllEventController = async (req, res) => {
     }
 }
 
+const joinEventController = async (req, res) => {
+    try {
+        const eventid = req.params._id
+        const event = await EventModel.findOne(eventid)
+        if(!event)
+            res.status(400).send('error')
+
+        const {id} = req.userid
+        const user = await EventModel.findOne(id)
+
+        event.participants.push(user).save()
+
+        res.json({message: 'user joined'})
+
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 
 
 module.exports = {
     createEventController,
     getAllEventController,
     getEventController,
+    joinEventController
 
 }

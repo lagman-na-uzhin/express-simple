@@ -55,7 +55,7 @@ const loginController = async (req, res) => {
         }
 
         const token = generateAccessToken(user._id);
-        res.status(200).json({ token });
+        res.status(200).json({token});
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
