@@ -27,8 +27,10 @@ const EventSchema = new Schema({
         ref: 'User'
     },
     participants: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+
+        _id: mongoose.Schema.Types.ObjectId,
+        name:String,
+        profileUrl: String,
     }],
     tags: [String],
     imageUrl: [String],

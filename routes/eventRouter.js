@@ -12,7 +12,7 @@ EventRouter.get('/:id', EventController.getEventController )
 
 EventRouter.post('/create', authMiddleware, EventController.createEventController)
 
-EventRouter.post('/join/:id', authMiddleware, joinEventController)
+EventRouter.get('/join/:id', authMiddleware, joinEventController)
 
 
 module.exports = EventRouter

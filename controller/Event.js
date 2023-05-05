@@ -1,5 +1,6 @@
 const {validationResult} = require('express-validator')
 const EventModel = require('../models/Event')
+const UserModel = require('../models/User')
 
 const createEventController = async (req, res) => {
     try {
@@ -47,18 +48,28 @@ const getAllEventController = async (req, res) => {
 
 const joinEventController = async (req, res) => {
     try {
-        const eventid = req.params._id
-        const event = await EventModel.findOne(eventid)
-        if(!event)
-            res.status(400).send('error')
+        const eventid = req.params.id
+        const event = await EventModel.findById({_id: eventid})
 
-        const {id} = req.userid
-        const user = await EventModel.findOne(id)
+        if(event) {
+            const userid = req.userid.id
 
-        event.participants.push(user).save()
+             const findUserInArray = event.participants.find(obj=>obj._id.toString()===userid.toString())
+             if (findUserInArray) {
+                 return res.json({message: "вы уже joined"})
+             }
 
-        res.json({message: 'user joined'})
+            const checkCapacity = event.participants.length < event.capacity
+            if(!checkCapacity){
+                return res.json({message: 'Уже полный'})
+            }
+            const user = await UserModel.findById(userid)
+            event.participants.push({_id: user._id, name: user.name, avatarUrl: user.avatarUrl});
+            await event.save()
+            res.json({message: 'user joined'})
+        }
 
+        res.status(400).json({message:'error'})
     } catch (e) {
         console.log(e)
     }
