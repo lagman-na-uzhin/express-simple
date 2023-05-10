@@ -8,27 +8,28 @@ require('dotenv').config();
 
 const generateAccessToken = (id) => {
     const payload = {id}
-
     return jwt.sign(payload, process.env.jwt_key, {expiresIn: '24h'})
+
 }
 const registrationController = async (req, res) => {
     try {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
-        }
-        const {name, email, password, age} = req.body;
+        console.log(errors)
+        if(!errors.isEmpty())
+            return res.status(400).json({message: errors});
+
+        const {name, email, password} = req.body;
 
         const candidate = await UserModel.findOne({email});
         if(candidate)
             return res.status(400).json({message: "Такой Email уже зарегистрирован"});
 
         const hashPassword = bcrypt.hashSync(password, 7);
-        const user = new UserModel({name, email, password: hashPassword, age});
+        const user = new UserModel({name, email, password: hashPassword});
 
         await user.save();
 
-        res.status(201).json({message: "User reg"});
+        res.status(201).json({message: "Пользователь успешно зарегистрирован"});
 
     } catch (err) {
         res.status(500).send(err);

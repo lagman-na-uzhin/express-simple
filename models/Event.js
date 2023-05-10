@@ -14,9 +14,9 @@ const EventSchema = new Schema({
         type: String,
     },
     date: {
-        type: Date
+        type: Date,
     },
-    categoty: {
+    category: {
         type: String,
     },
     capacity: {
@@ -24,7 +24,8 @@ const EventSchema = new Schema({
     },
     organizer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     participants: [{
 

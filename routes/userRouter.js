@@ -1,9 +1,9 @@
 const { Router } = require('express')
-const UserRouter = Router()
 const authMiddleware = require('../middleware/authMiddleware')
+const getAboutProfileController = require('../controller/User')
 
-UserRouter.get('/info', authMiddleware, (req, res) => {
-    res.send('ok')
-});
+const UserRouter = Router()
 
-module.exports = UserRouter
+UserRouter.get('/info', authMiddleware, getAboutProfileController)
+
+module.exports = UserRouter;

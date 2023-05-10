@@ -5,19 +5,15 @@ module.exports = function (req, res, next) {
     try {
         const token = req.headers.authorization.split(" ")[1];
         if (!token) {
-            return res.json({ message: "Пользователь не авторизован" });
+            return res.json({ message: "Пользователь не авторизован" }).status(400);
         }
 
         const decoded = jwt.verify(token, process.env.jwt_key);
-        if (!decoded) {
-            return res.json({ message: "Неверный токен" });
-        }
-
-        req.userid = decoded;
+        req.userData = decoded;
         next();
     } catch (e) {
         console.log(e);
-        res.json({ message: "Пользователь не авторизован" });
+        res.json({ message: "Пользователь не авторизован" }).status(400);
     }
 };
 
