@@ -1,32 +1,23 @@
-const {validationResult} = require('express-validator')
 const UserModel = require('../models/User')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 require('dotenv').config();
 
-
 const generateAccessToken = (id) => {
     const payload = {id}
     return jwt.sign(payload, process.env.jwt_key, {expiresIn: '24h'})
-
 }
 const registrationController = async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        console.log(errors)
-        if(!errors.isEmpty())
-            return res.status(400).json({message: errors});
-
-        const {name, email, password} = req.body;
+    try {const {firstname, lastname, email, password, age, interest, location } = req.body;
 
         const candidate = await UserModel.findOne({email});
         if(candidate)
             return res.status(400).json({message: "Такой Email уже зарегистрирован"});
 
-        const hashPassword = bcrypt.hashSync(password, 7);
-        const user = new UserModel({name, email, password: hashPassword});
+        const hashPassword = bcrypt.hashSync(password, 7)
 
+        const user = new UserModel({firstname, lastname, email, password: hashPassword, age, interest, location})
         await user.save();
 
         res.status(201).json({message: "Пользователь успешно зарегистрирован"});
@@ -37,14 +28,8 @@ const registrationController = async (req, res) => {
 }
 
 const loginController = async (req, res) => {
-    const errors = validationResult(req).array({ onlyFirstError: true });
-    if(!errors)
-        return res.status(400).json({message: errors});
-
-
-    const {email, password} = req.body;
-
     try {
+        const {email, password} = req.body;
         const user = await UserModel.findOne({ email });
         if (!user) {
             return res.status(401).send("Invalid email or password");

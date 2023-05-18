@@ -1,6 +1,7 @@
 const {validationResult} = require('express-validator')
 const EventModel = require('../models/Event')
 const UserModel = require('../models/User')
+const CommentModel = require('../models/Comment')
 
 const createEventController = async (req, res) => {
     try {
@@ -14,7 +15,7 @@ const createEventController = async (req, res) => {
         const event = new EventModel({title, description, date, category, capacity, organizer, participants, tags, imageUrl, location })
 
         await event.save()
-        res.json({message: "ok.."})
+        res.status(200).json({message: "ok.."})
     } catch (err) {
         console.log(err)
     }
@@ -23,9 +24,9 @@ const createEventController = async (req, res) => {
 const getEventController = async (req, res) => {
     try {
         const id = req.params.id
-        const event = await EventModel.findOne({_id: id})
+        const event = await EventModel.findById(id)
         if(!event)
-            return res.json({message: "Такой событий нет"}.status(400))
+            return res.status(400).json({message: "Такой событий нет"})
 
         res.status(200).json({event})
     } catch (e) {
@@ -37,9 +38,9 @@ const getAllEventController = async (req, res) => {
     try {
         const events = await EventModel.find()
         if(!events)
-            return res.json({message: "Нет событий"})
+            return res.status(400).json({message: "Нет событий"})
 
-        res.send(events).status(200)
+        res.status(200).send(events)
     } catch (e) {
         console.log(e)
     }
@@ -53,19 +54,24 @@ const joinEventController = async (req, res) => {
         if(event) {
             const userid = req.userData.id
 
-             const findUserInArray = event.participants.find(obj=>obj._id.toString()===userid.toString())
-             if (findUserInArray) {
-                 return res.json({message: "вы уже joined"}).status(400)
+             if(event.participants.lenght > 0) {
+                 const findUserInArray = event.participants.find(obj => obj.userid.toString() === userid.toString())
+                 if (findUserInArray) {
+                     return res.status(400).json({message: "вы уже joined"})
+                 }
              }
 
             const checkCapacity = event.participants.length < event.capacity
             if(!checkCapacity){
-                return res.json({message: 'Уже полный'}).status(400)
+                return res.status(400).json({message: 'Уже полный'})
             }
             const user = await UserModel.findById(userid)
-            event.participants.push({_id: user._id, name: user.name, avatarUrl: user.avatarUrl});
+            console.log(user, 'userrrrrr')
+
+            const {_id, firstname, lastname, avatar} = user
+            event.participants.push({userid: _id, firstname, lastname, avatar});
             await event.save()
-            res.json({message: 'user joined'}).status(200)
+            res.status(200).json({message: 'user joined'})
         }
 
         res.status(400).json({message:'error'})
@@ -95,11 +101,62 @@ const getMyEventsController = async (req, res)=>{
 
 }
 
+const addCommentController = async (req, res) => {
+    try {
+        const userid = req.userData.id
+        const user = await UserModel.findById(userid)
+
+        const {text} = req.body
+        const comment = new CommentModel({
+            author:
+                    {firstname: user.firstname,
+                        lastname: user.lastname,
+                        avatar: user.avatar,
+                        authorid: user._id}, text})
+
+        await comment.save()
+
+        const eventid = req.params.id
+        const event = await EventModel.findById(eventid)
+        if(event)
+            event.comments.push(comment._id)
+            await  event.save()
+
+        res.status(200).json(event)
+    } catch (e) {
+        res.status(500).json(e)
+        console.log(e)
+    }
+}
+
+const getCommentsController = async (req, res) => {
+try{
+    const eventid = req.params.id
+    const event = await EventModel.findById(eventid)
+
+
+    const commentsArr = []
+
+    for (const element of event.comments) {
+        const id = element._id
+        const commentData = await CommentModel.findById(id)
+        commentsArr.push(commentData)
+    }
+
+    res.status(200).json(commentsArr)
+} catch (e) {
+    res.status(500).json(e)
+}
+
+}
+
 module.exports = {
     createEventController,
     getAllEventController,
     getEventController,
     joinEventController,
-    getMyEventsController
+    getMyEventsController,
+    addCommentController,
+    getCommentsController
 
 }

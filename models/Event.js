@@ -28,10 +28,13 @@ const EventSchema = new Schema({
         required: true
     },
     participants: [{
-
-        _id: mongoose.Schema.Types.ObjectId,
-        name:String,
-        profileUrl: String,
+        userid: String,
+        firstname: String,
+        lastname: String,
+        avatar:{
+            name: String,
+            filename: String,
+            path: String}
     }],
     tags: [String],
     imageUrl: [String],

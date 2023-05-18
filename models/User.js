@@ -2,7 +2,11 @@ const {Schema} = require('mongoose')
 const mongoose = require("mongoose");
 
 const UserSchema = new Schema({
-    name: {
+    firstname: {
+        required: true,
+        type: String
+    },
+    lastname: {
         required: true,
         type: String
     },
@@ -24,8 +28,12 @@ const UserSchema = new Schema({
         default: 'user'
     },
     interest:String,
-    bio:String,
-    avatarUrl:String
+    location: String,
+    avatar:{
+        name: String,
+        filename: String,
+        path: String
+    }
 
 })
 
